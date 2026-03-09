@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JyotirPath | Divine Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50">
+    <nav class="bg-white/80 backdrop-blur-md p-4 px-8 shadow-sm flex justify-between items-center sticky top-0 z-[1001] border-b border-slate-200">
+        <h1 class="text-orange-600 font-black text-2xl tracking-tight flex items-center gap-2">
+            <span class="text-3xl">🕉️</span> JYOTIRPATH
+        </h1>
+        <div id="distanceDisplay" class="hidden font-bold text-slate-700 bg-orange-100 px-4 py-2 rounded-full border border-orange-200 shadow-sm animate-fade-in"></div>
+    </nav>
+
+    <div class="relative py-20 px-8 text-center bg-slate-900 border-b border-slate-200 overflow-hidden">
+        <div class="absolute inset-0 opacity-40 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/e0/Somnath_temple_04.jpg')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900"></div>
+        <div class="relative z-10 max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-lg">Divine Pilgrimage Planner</h2>
+            <p class="text-slate-300 text-lg mb-8">Plan your spiritual journey across the 12 sacred Jyotirlingas of India.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center bg-white/10 backdrop-blur-md p-6 rounded-3xl max-w-xl mx-auto border border-white/20 shadow-2xl">
+                <label class="font-semibold text-white">Temples to map:</label>
+                <input type="number" id="templeCount" value="12" min="1" max="12" class="border-2 border-transparent bg-white p-3 rounded-xl w-24 text-center font-bold text-slate-800 focus:border-orange-500 outline-none transition-colors">
+                <button id="generateBtn" class="bg-orange-600 hover:bg-orange-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:-translate-y-1 active:scale-95 w-full sm:w-auto">Generate Route</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4 md:p-8 max-w-7xl mx-auto -mt-10 relative z-20">
+        <div id="map" class="h-[600px] w-full rounded-3xl shadow-2xl border-4 border-white overflow-hidden"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-16">
+        <h3 class="text-3xl font-extrabold text-slate-900 mb-8 text-center">Explore the 12 Jyotirlingas</h3>
+        <div id="temple-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

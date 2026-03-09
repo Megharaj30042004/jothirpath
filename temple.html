@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacred Details | JyotirPath</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        @keyframes pulse-soft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        .playing-audio { animation: pulse-soft 2s infinite; background-color: #ffedd5 !important; border-color: #fdba74 !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div id="content"></div>
+
+    <script src="data.js"></script>
+    
+    <script>
+        const id = new URLSearchParams(window.location.search).get('id');
+        const t = jyotirlingas.find(x => x.id == id);
+
+        // TTS Engine 
+        let availableVoices = [];
+        let isPlaying = false;
+        let storyChunks = [];
+        let currentChunkIndex = 0;
+        
+        const loadVoices = () => { availableVoices = window.speechSynthesis.getVoices(); };
+        if ('speechSynthesis' in window) { loadVoices(); if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices; }
+
+        window.playKannadaAudio = function() {
+            if (!('speechSynthesis' in window)) { alert("TTS not supported."); return; }
+            const btn = document.getElementById('tts-btn'); const btnText = document.getElementById('tts-btn-text');
+
+            if (isPlaying) { window.speechSynthesis.cancel(); isPlaying = false; btn.classList.remove('playing-audio'); btnText.innerHTML = "🎧 ಇತಿಹಾಸವನ್ನು ಕೇಳಿ (Listen)"; return; }
+
+            storyChunks = t.historyKn.match(/[^.!?]+[.!?]+/g) || [t.historyKn];
+            currentChunkIndex = 0; isPlaying = true;
+            btn.classList.add('playing-audio'); btnText.innerHTML = "⏹️ ಆಲಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಿ (Stop)";
+            readNextChunk();
+        };
+
+        function readNextChunk() {
+            if (currentChunkIndex >= storyChunks.length || !isPlaying) {
+                isPlaying = false; document.getElementById('tts-btn').classList.remove('playing-audio'); document.getElementById('tts-btn-text').innerHTML = "🎧 ಇತಿಹಾಸವನ್ನು ಕೇಳಿ (Listen)"; return;
+            }
+            const textToRead = storyChunks[currentChunkIndex].trim();
+            if (!textToRead) { currentChunkIndex++; return readNextChunk(); }
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'kn-IN'; utterance.rate = 0.85; 
+            const preferredVoice = availableVoices.find(v => v.lang === 'kn-IN' || v.lang.includes('IN'));
+            if (preferredVoice) utterance.voice = preferredVoice;
+            utterance.onend = () => { currentChunkIndex++; readNextChunk(); };
+            utterance.onerror = () => { isPlaying = false; };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        window.onbeforeunload = () => { window.speechSynthesis.cancel(); };
+
+        if (t) {
+            document.getElementById('content').innerHTML = `
+                <div class="h-[60vh] relative w-full overflow-hidden bg-slate-900">
+                    <img src="${t.image}" class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-[10s]">
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-[#f8fafc]"></div>
+                    <a href="index.html" class="absolute top-6 left-6 z-20 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white px-6 py-2 rounded-full font-bold transition-all border border-white/30">← Back</a>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pt-10">
+                        <span class="px-5 py-1.5 rounded-full bg-orange-600/90 text-white text-sm font-bold uppercase tracking-widest mb-4">Jyotirlinga Darshan</span>
+                        <h1 class="text-5xl md:text-8xl font-extrabold text-white drop-shadow-2xl tracking-tight">${t.name}</h1>
+                        <p class="text-orange-300 font-bold tracking-[0.3em] mt-4 uppercase text-xl">${t.city}, ${t.state}</p>
+                    </div>
+                </div>
+
+                <div class="max-w-6xl mx-auto px-4 sm:px-6 -mt-32 relative z-10 pb-20">
+                    <div class="glass-card rounded-3xl shadow-2xl p-6 md:p-8 mb-8 flex flex-wrap justify-center gap-6 md:gap-12 text-center">
+                        <div class="flex flex-col items-center"><span class="text-orange-500 text-3xl mb-2">⭐</span><span class="font-bold text-slate-800 text-xl">${t.rating} / 5</span><span class="text-xs text-slate-500 uppercase font-bold">Rating</span></div>
+                        <div class="w-px bg-slate-300 hidden md:block"></div>
+                        <div class="flex flex-col items-center"><span class="text-orange-500 text-3xl mb-2">🕰️</span><span class="font-bold text-slate-800 text-xl">${t.time}</span><span class="text-xs text-slate-500 uppercase font-bold">Timings</span></div>
+                        <div class="w-px bg-slate-300 hidden md:block"></div>
+                        <div class="flex flex-col items-center"><span class="text-orange-500 text-3xl mb-2">📅</span><span class="font-bold text-slate-800 text-xl">${t.bestTime}</span><span class="text-xs text-slate-500 uppercase font-bold">Best Season</span></div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 space-y-8">
+                            <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                                <div class="flex justify-between items-start mb-8 flex-col sm:flex-row gap-6">
+                                    <h2 class="text-3xl font-extrabold text-slate-900">Puranic History</h2>
+                                    <button id="tts-btn" onclick="playKannadaAudio()" class="flex items-center gap-2 bg-orange-50 border-2 border-orange-200 text-orange-800 px-6 py-3.5 rounded-full font-bold">
+                                        <span id="tts-btn-text">🎧 ಇತಿಹಾಸವನ್ನು ಕೇಳಿ (Listen)</span>
+                                    </button>
+                                </div>
+                                <p class="text-lg text-slate-700 leading-loose whitespace-pre-line">${t.historyKn}</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-br from-orange-600 to-amber-600 p-8 rounded-3xl text-white shadow-lg">
+                                <h3 class="font-bold mb-3 text-xl opacity-90">✨ Spiritual Significance</h3>
+                                <p class="leading-relaxed text-lg font-medium">${t.info}</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-5">
+                                <div class="bg-blue-50 p-4 rounded-2xl text-blue-600 text-2xl">✈️</div>
+                                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nearest Airport</h4><p class="text-slate-800 font-extrabold text-lg">${t.nearestAirport}</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-5">
+                                <div class="bg-emerald-50 p-4 rounded-2xl text-emerald-600 text-2xl">🏔️</div>
+                                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Temple Type</h4><p class="text-slate-800 font-extrabold text-lg">${t.templeType}</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-5">
+                                <div class="bg-purple-50 p-4 rounded-2xl text-purple-600 text-2xl">🗣️</div>
+                                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Languages</h4><p class="text-slate-800 font-extrabold text-lg">${t.languages}</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-5">
+                                <div class="bg-yellow-50 p-4 rounded-2xl text-yellow-600 text-2xl">🎟️</div>
+                                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Entry Fee</h4><p class="text-slate-800 font-extrabold text-lg">${t.ticketPrice}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
